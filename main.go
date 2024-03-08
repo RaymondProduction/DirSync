@@ -35,6 +35,7 @@ func onReady() {
 				})
 			case <-mQuit.ClickedCh:
 				glib.IdleAdd(func() {
+					win.Destroy()
 					gtk.MainQuit()
 				})
 				systray.Quit()
