@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -19,7 +20,6 @@ func onReady() {
 	win := initGTKWindow()
 
 	systray.SetIcon(getIcon("icon.png"))
-	systray.SetTitle("System tray")
 	systray.SetTooltip("Exaple for system tray")
 	mOpen := systray.AddMenuItem("Open Window", "Open Window")
 	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
@@ -27,20 +27,23 @@ func onReady() {
 	systray.AddSeparator()
 
 	go func() {
-		select {
-		case <-mOpen.ClickedCh:
-			glib.IdleAdd(func() {
-				win.ShowAll()
-			})
-			//win.ShowAll()
-		case <-mQuit.ClickedCh:
-			glib.IdleAdd(func() {
-				gtk.MainQuit()
-			})
-			systray.Quit()
-			log.Println("Quit")
+		for {
+			select {
+			case <-mOpen.ClickedCh:
+				glib.IdleAdd(func() {
+					win.ShowAll()
+				})
+			case <-mQuit.ClickedCh:
+				glib.IdleAdd(func() {
+					gtk.MainQuit()
+				})
+				systray.Quit()
+				log.Println("Quit")
+				return // exit the goroutine after the program is finished
+			}
 		}
 	}()
+
 }
 
 func onExit() {
@@ -63,7 +66,14 @@ func initGTKWindow() *gtk.Window {
 		log.Fatal("Failed to create window:", err)
 	}
 	win.SetTitle("Run GTK")
-	win.Connect("destroy", gtk.MainQuit)
+	win.Connect("destroy", func() {
+		fmt.Println("Destroy")
+	})
+
+	win.Connect("delete-event", func() bool {
+		win.Hide()  // Hide the window.
+		return true // Returning true prevents further propagation of the signal and stops the window from closing.
+	})
 
 	// Create container VBox
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
