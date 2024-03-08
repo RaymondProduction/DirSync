@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/getlantern/systray"
 )
@@ -29,7 +29,7 @@ func onExit() {
 }
 
 func getIcon(filePath string) []byte {
-	icon, err := ioutil.ReadFile(filePath)
+	icon, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Fatalf("Error during downloading icon: %v", err)
 	}
