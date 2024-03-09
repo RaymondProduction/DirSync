@@ -61,43 +61,41 @@ func getIcon(filePath string) []byte {
 
 func initGTKWindow() *gtk.Window {
 
-	// Create new window of top level
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	// Create builder
+	b, err := gtk.BuilderNew()
 	if err != nil {
-		log.Fatal("Failed to create window:", err)
+		log.Fatal("Error bulder:", err)
 	}
-	win.SetTitle("Run GTK")
-	win.Connect("destroy", func() {
-		fmt.Println("Destroy")
-	})
 
-	win.Connect("delete-event", func() bool {
-		win.Hide()  // Hide the window.
-		return true // Returning true prevents further propagation of the signal and stops the window from closing.
-	})
-
-	// Create container VBox
-	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	// Lload the window from the Glade file into the builder
+	err = b.AddFromFile("main.glade")
 	if err != nil {
-		log.Fatal("Failed to create container:", err)
+		log.Fatal("Error when loading glade file:", err)
 	}
-	win.Add(box)
 
-	// Create a label
-	label, err := gtk.LabelNew("Hello")
+	// We get the object of the main window by ID
+	obj, err := b.GetObject("setting-window")
 	if err != nil {
-		log.Fatal("Failed to create a label:", err)
+		log.Fatal("Error:", err)
 	}
-	box.PackStart(label, true, true, 0)
 
-	// Create a button to open a file selection dialog
-	button, err := gtk.ButtonNewWithLabel("Вибрати файл")
+	win := obj.(*gtk.Window)
+
+	// We get the object of the main window by ID
+	objOpenFolder, err := b.GetObject("open_folder")
 	if err != nil {
-		log.Fatal("Failed to create a button:", err)
+		log.Fatal("Error:", err)
 	}
-	box.PackStart(button, true, true, 0)
 
-	// Add a button click event handler
+	button := objOpenFolder.(*gtk.Button)
+
+	objPath, err := b.GetObject("path")
+	if err != nil {
+		log.Fatal("Error:", err)
+	}
+
+	entry := objPath.(*gtk.Entry)
+
 	button.Connect("clicked", func() {
 		dialog, err := gtk.FileChooserDialogNewWith2Buttons("Select file", win, gtk.FILE_CHOOSER_ACTION_OPEN, "Cancel", gtk.RESPONSE_CANCEL, "Select", gtk.RESPONSE_ACCEPT)
 		if err != nil {
@@ -109,7 +107,7 @@ func initGTKWindow() *gtk.Window {
 		if err != nil {
 			log.Fatal("Failed to create file filter:", err)
 		}
-		filter.AddPattern("*.txt")
+		filter.AddPattern("*.*")
 		filter.SetName("Text files")
 		dialog.AddFilter(filter)
 
@@ -117,11 +115,18 @@ func initGTKWindow() *gtk.Window {
 		if response == gtk.RESPONSE_ACCEPT {
 			filename := dialog.GetFilename()
 			log.Println("Selected file:", filename)
+			entry.SetText(filename)
 		}
 	})
 
-	// We set the size of the window
-	win.SetDefaultSize(300, 200)
+	win.Connect("destroy", func() {
+		fmt.Println("Destroy")
+	})
+
+	win.Connect("delete-event", func() bool {
+		win.Hide()  // Hide the window.
+		return true // Returning true prevents further propagation of the signal and stops the window from closing.
+	})
 
 	return win
 }
