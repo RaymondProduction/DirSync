@@ -10,6 +10,13 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+/*
+
+For mac 
+sudo chown -R admin /opt/homebrew  
+brew install pkg-config gtk+3 adwaita-icon-theme
+
+*/
 func main() {
 	systray.Run(onReady, onExit)
 }
