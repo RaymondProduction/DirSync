@@ -97,25 +97,17 @@ func initGTKWindow() *gtk.Window {
 	entry := objPath.(*gtk.Entry)
 
 	button.Connect("clicked", func() {
-		dialog, err := gtk.FileChooserDialogNewWith2Buttons("Select file", win, gtk.FILE_CHOOSER_ACTION_OPEN, "Cancel", gtk.RESPONSE_CANCEL, "Select", gtk.RESPONSE_ACCEPT)
+		dialog, err := gtk.FileChooserDialogNewWith2Buttons("Select folder", win, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, "Cancel", gtk.RESPONSE_CANCEL, "Select", gtk.RESPONSE_ACCEPT)
 		if err != nil {
 			log.Fatal("Failed to create dialog box:", err)
 		}
 		defer dialog.Destroy()
 
-		filter, err := gtk.FileFilterNew()
-		if err != nil {
-			log.Fatal("Failed to create file filter:", err)
-		}
-		filter.AddPattern("*.*")
-		filter.SetName("Text files")
-		dialog.AddFilter(filter)
-
 		response := dialog.Run()
 		if response == gtk.RESPONSE_ACCEPT {
-			filename := dialog.GetFilename()
-			log.Println("Selected file:", filename)
-			entry.SetText(filename)
+			folderPath := dialog.GetFilename()
+			log.Println("Selected folder:", folderPath)
+			entry.SetText(folderPath)
 		}
 	})
 
