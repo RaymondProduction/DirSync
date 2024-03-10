@@ -10,21 +10,25 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+var win *gtk.Window
+
 /*
-
-For mac 
-sudo chown -R admin /opt/homebrew  
+For mac
+sudo chown -R admin /opt/homebrew
 brew install pkg-config gtk+3 adwaita-icon-theme
-
 */
 func main() {
-	systray.Run(onReady, onExit)
+	gtk.Init(nil)
+	win = initGTKWindow()
+
+	go func() {
+		systray.Run(onReady, onExit)
+	}()
+
+	gtk.Main()
 }
 
 func onReady() {
-
-	gtk.Init(nil)
-	win := initGTKWindow()
 
 	systray.SetIcon(getIcon("icon.png"))
 	systray.SetTooltip("Exaple for system tray")
